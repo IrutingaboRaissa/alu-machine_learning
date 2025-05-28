@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Function that calculates the determinant of a matrix"""
 
-
 def determinant(matrix):
     """Function that calculates the determinant of a matrix"""
     if type(matrix) is not list or len(matrix) == 0:
