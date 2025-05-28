@@ -24,13 +24,13 @@ def determinant(matrix):
 
 def cofactor(matrix):
     """Function that calculates the cofactor matrix of a matrix"""
-    if len(matrix) == 1 and len(matrix[i]) == 1:
+    if len(matrix) == 1 and len(matrix[0]) == 1:
         return [[1]]
     if len(matrix) == 2:
         cofactor = [i[::-1] for i in matrix]
         cofactor = cofactor[::-1]
         cofactor = [[cofactor[i][j] if (i + j) % 2 == 0 else -cofactor[i][j]
-                     for j in range(len(cofactor[i]))]
+                    for j in range(len(cofactor[i]))]
                     for i in range(len(cofactor))]
         return cofactor
     cofactor = [[j for j in matrix[i]] for i in range(len(matrix))]
