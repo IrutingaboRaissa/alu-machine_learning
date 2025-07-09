@@ -1,1 +1,1 @@
-Probablity
+Probability

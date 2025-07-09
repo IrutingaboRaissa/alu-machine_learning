@@ -1,128 +1,57 @@
 #!/usr/bin/env python3
-""" defines Normal class that represents normal distribution """
+"""Normal distribution"""
 
 
 class Normal:
-    """
-    class that represents normal distribution
-
-    class constructor:
-        def __init__(self, data=None, mean=0., stddev=1.)
-
-    instance attributes:
-        mean [float]: the mean of the distribution
-        stddev [float]: the standard deviation of the distribution
-
-    instance methods:
-        def z_score(self, x): calculates the z-score of a given x-value
-        def x_value(self, z): calculates the x-value of a given z-score
-        def pdf(self, x): calculates PDF for given x-value
-        def cdf(self, x): calculates CDF for given x-value
-    """
+    """Normal class that represents a normal distribution"""
+    e = 2.7182818285
+    π = 3.1415926536
 
     def __init__(self, data=None, mean=0., stddev=1.):
-        """
-        class constructor
+        """Class constructor
 
-        parameters:
-            data [list]: data to be used to estimate the distibution
-            mean [float]: the mean of the distribution
-            stddev [float]: the standard deviation of the distribution
-
-        Sets the instance attributes mean and stddev as floats
-        If data is not given:
-            Use the given mean and stddev
-            raise ValueError if stddev is not positive value
-        If data is given:
-            Calculate the mean and stddev of data
-            Raise TypeError if data is not a list
-            Raise ValueError if data does not contain at least two data points
+        data: is a list of the data to be used to estimate the distribution
+        mean: is the mean of the distribution
+        stddev: is the standard deviation of the distribution
         """
+        self.mean = float(mean)
+        self.stddev = float(stddev)
         if data is None:
-            if stddev < 1:
-                raise ValueError("stddev must be a positive value")
-            else:
-                self.stddev = float(stddev)
-                self.mean = float(mean)
+            if stddev <= 0:
+                raise ValueError('stddev must be a positive value')
         else:
             if type(data) is not list:
-                raise TypeError("data must be a list")
-            elif len(data) < 2:
-                raise ValueError("data must contain multiple values")
-            else:
-                mean = float(sum(data) / len(data))
-                self.mean = mean
-                summation = 0
-                for x in data:
-                    summation += ((x - mean) ** 2)
-                stddev = (summation / len(data)) ** (1 / 2)
-                self.stddev = stddev
+                raise TypeError('data must be a list')
+            if len(data) < 2:
+                raise ValueError('data must contain multiple values')
+            leng = len(data)
+            self.mean = sum(data) / leng
+            variance = sum((x - self.mean) ** 2 for x in data) / leng
+            self.stddev = variance ** 0.5
 
     def z_score(self, x):
-        """
-        calculates the z-score of a given x-value
-
-        parameters:
-            x: x-value
-
-        return:
-            z-score of x
-        """
-        mean = self.mean
-        stddev = self.stddev
-        z = (x - mean) / stddev
-        return z
+        """Calculating the z-score of a given x-value"""
+        return (x - self.mean) / self.stddev
 
     def x_value(self, z):
-        """
-        calculates the x-value of a given z-score
-
-        parameters:
-            z: z-score
-
-        return:
-            x-value of z
-        """
-        mean = self.mean
-        stddev = self.stddev
-        x = (z * stddev) + mean
-        return x
+        """Calculating the x-value of a given z-score"""
+        return (z * self.stddev) + self.mean
 
     def pdf(self, x):
-        """
-        calculates the value of the PDF for a given x-value
+        """Calculating the value of the PDF for a given x-value"""
+        stdd = self.stddev
+        first_part = 1 / (stdd * ((self.π * 2) ** 0.5))
+        second_part = self.e ** (self.z_score(x) ** 2 * -0.5)
+        return first_part * second_part
 
-        parameters:
-            x: x-value
-
-        return:
-            the PDF value for x
-        """
-        mean = self.mean
-        stddev = self.stddev
-        e = 2.7182818285
-        pi = 3.1415926536
-        power = -0.5 * (self.z_score(x) ** 2)
-        coefficient = 1 / (stddev * ((2 * pi) ** (1 / 2)))
-        pdf = coefficient * (e ** power)
-        return pdf
+    def erf(self, x):
+        """Function that calculates the erf of x"""
+        first_part = 2 / (self.π ** 0.5)
+        second_part = (x - (x ** 3 / 3) + (x ** 5 / 10)
+                       - (x ** 7 / 42) + (x ** 9 / 216))
+        return first_part * second_part
 
     def cdf(self, x):
-        """
-        calculates the value of the CDF for a given x-value
-
-        parameters:
-            x: x-value
-
-        return:
-            the CDF value for x
-        """
-        mean = self.mean
-        stddev = self.stddev
-        pi = 3.1415926536
-        value = (x - mean) / (stddev * (2 ** (1 / 2)))
-        erf = value - ((value ** 3) / 3) + ((value ** 5) / 10)
-        erf = erf - ((value ** 7) / 42) + ((value ** 9) / 216)
-        erf *= (2 / (pi ** (1 / 2)))
-        cdf = (1 / 2) * (1 + erf)
-        return cdf
+        """Function that calculates the value of the CDF for a given x-value"""
+        z_score_modified = (x - self.mean) / (self.stddev * (2 ** 0.5))
+        return 0.5 * (1 + self.erf(z_score_modified))
