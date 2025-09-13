@@ -1,67 +1,47 @@
 #!/usr/bin/env python3
+"""Class Neuron that defines a single neuron performing binary classification
 """
-Module containing the Neuron class for binary classification with private attributes
-"""
+
+
 import numpy as np
 
 
 class Neuron:
-    """
-    A class that defines a single neuron performing binary classification
+    """ Class Neuron
     """
 
     def __init__(self, nx):
-        """
-        Initialize a Neuron instance
+        """ Instantiation function of the neuron
 
         Args:
-            nx (int): The number of input features to the neuron
+            nx (_type_): _description_
 
         Raises:
-            TypeError: If nx is not an integer
-            ValueError: If nx is less than 1
+            TypeError: _description_
+            ValueError: _description_
         """
         if not isinstance(nx, int):
-            raise TypeError("nx must be an integer")
+            raise TypeError('nx must be an integer')
         if nx < 1:
-            raise ValueError("nx must be a positive integer")
+            raise ValueError('nx must be a positive')
 
-        # Initialize private weights using random normal distribution
-        # Shape is (1, nx) as shown in the example output
+        # initialize private instance attributes
         self.__W = np.random.normal(size=(1, nx))
-        
-        # Initialize private bias to 0
         self.__b = 0
-        
-        # Initialize private activated output to 0
         self.__A = 0
 
+        # getter function
     @property
     def W(self):
-        """
-        Getter method for the weights vector
-
-        Returns:
-            numpy.ndarray: The weights vector for the neuron
-        """
+        """Return weights"""
         return self.__W
 
     @property
     def b(self):
-        """
-        Getter method for the bias
-
-        Returns:
-            int: The bias for the neuron
-        """
+        """Return bias"""
         return self.__b
 
     @property
     def A(self):
-        """
-        Getter method for the activated output
-
-        Returns:
-            int: The activated output of the neuron (prediction)
-        """
+        """Return output"""
         return self.__A

@@ -1,236 +1,123 @@
 #!/usr/bin/env python3
+""" Neural Network
 """
-Module containing the NeuralNetwork class for binary classification with gradient descent
-"""
+
 import numpy as np
 
 
 class NeuralNetwork:
-    """
-    A class that defines a neural network with one hidden layer performing binary classification
+    """ Class that defines a neural network with one hidden layer performing
+        binary classification.
     """
 
     def __init__(self, nx, nodes):
-        """
-        Initialize a NeuralNetwork instance
+        """ Instantiation function
 
         Args:
-            nx (int): The number of input features
-            nodes (int): The number of nodes found in the hidden layer
-
-        Raises:
-            TypeError: If nx or nodes is not an integer
-            ValueError: If nx or nodes is less than 1
+            nx (int): size of the input layer
+            nodes (_type_): _description_
         """
-        # Validate nx parameter
         if not isinstance(nx, int):
-            raise TypeError("nx must be an integer")
+            raise TypeError('nx must be an integer')
         if nx < 1:
-            raise ValueError("nx must be a positive integer")
-        
-        # Validate nodes parameter
-        if not isinstance(nodes, int):
-            raise TypeError("nodes must be an integer")
-        if nodes < 1:
-            raise ValueError("nodes must be a positive integer")
+            raise ValueError('nx must be a positive integer')
 
-        # Initialize private weights for hidden layer using random normal distribution
-        # __W1 has shape (nodes, nx) - each row is weights for one hidden node
-        self.__W1 = np.random.normal(size=(nodes, nx))
-        
-        # Initialize private bias for hidden layer with zeros
-        # __b1 has shape (nodes, 1) - one bias per hidden node
+        if not isinstance(nodes, int):
+            raise TypeError('nodes must be an integer')
+        if nodes < 1:
+            raise ValueError('nodes must be a positive integer')
+
+        self.__W1 = np.random.randn(nodes, nx)
         self.__b1 = np.zeros((nodes, 1))
-        
-        # Initialize private activated output for hidden layer
         self.__A1 = 0
-        
-        # Initialize private weights for output neuron using random normal distribution
-        # __W2 has shape (1, nodes) - weights from hidden layer to output
-        self.__W2 = np.random.normal(size=(1, nodes))
-        
-        # Initialize private bias for output neuron
+        self.__W2 = np.random.randn(1, nodes)
         self.__b2 = 0
-        
-        # Initialize private activated output for output neuron (prediction)
         self.__A2 = 0
 
+    # getter functions
     @property
     def W1(self):
-        """
-        Getter method for the weights vector for the hidden layer
-
-        Returns:
-            numpy.ndarray: The weights vector for the hidden layer
-        """
+        """Return weights vector for hidden layer"""
         return self.__W1
 
     @property
     def b1(self):
-        """
-        Getter method for the bias for the hidden layer
-
-        Returns:
-            numpy.ndarray: The bias for the hidden layer
-        """
+        """Return bias for hidden layer"""
         return self.__b1
 
     @property
     def A1(self):
-        """
-        Getter method for the activated output for the hidden layer
-
-        Returns:
-            int or numpy.ndarray: The activated output for the hidden layer
-        """
+        """Return activated output for hidden layer"""
         return self.__A1
 
     @property
     def W2(self):
-        """
-        Getter method for the weights vector for the output neuron
-
-        Returns:
-            numpy.ndarray: The weights vector for the output neuron
-        """
+        """Return weights vector for output neuron"""
         return self.__W2
 
     @property
     def b2(self):
-        """
-        Getter method for the bias for the output neuron
-
-        Returns:
-            int: The bias for the output neuron
-        """
+        """Return bias for the output neuron"""
         return self.__b2
 
     @property
     def A2(self):
-        """
-        Getter method for the activated output for the output neuron
-
-        Returns:
-            int or numpy.ndarray: The activated output for the output neuron (prediction)
-        """
+        """Return activated output for the output neuron"""
         return self.__A2
 
     def forward_prop(self, X):
-        """
-        Calculates the forward propagation of the neural network
+        """ Calculates the forward propagation of the neural network
 
         Args:
-            X (numpy.ndarray): Input data with shape (nx, m)
-                nx is the number of input features
-                m is the number of examples
-
-        Returns:
-            tuple: The activated outputs (A1, A2) of the hidden layer and output layer
+            X (numpy.array): Input data with shape (nx, m)
         """
-        # Forward propagation for hidden layer
-        # Z1 = W1 * X + b1
-        Z1 = np.matmul(self.__W1, X) + self.__b1
-        
-        # Apply sigmoid activation function to get A1
-        # sigmoid(z) = 1 / (1 + e^(-z))
-        self.__A1 = 1 / (1 + np.exp(-Z1))
-        
-        # Forward propagation for output layer
-        # Z2 = W2 * A1 + b2
-        Z2 = np.matmul(self.__W2, self.__A1) + self.__b2
-        
-        # Apply sigmoid activation function to get A2 (final output)
-        self.__A2 = 1 / (1 + np.exp(-Z2))
-        
-        # Return both activated outputs
+        z = np.matmul(self.__W1, X) + self.__b1
+        sigmoid = 1 / (1 + np.exp(-z))
+        self.__A1 = sigmoid
+        z = np.matmul(self.__W2, self.__A1) + self.__b2
+        sigmoid = 1 / (1 + np.exp(-z))
+        self.__A2 = sigmoid
         return self.__A1, self.__A2
 
     def cost(self, Y, A):
-        """
-        Calculates the cost of the model using logistic regression
+        """ Calculates the cost of the model using logistic regression
 
         Args:
-            Y (numpy.ndarray): Correct labels with shape (1, m)
-            A (numpy.ndarray): Activated output with shape (1, m)
-
-        Returns:
-            float: The cost of the model
+            Y (_type_): _description_
+            A (_type_): _description_
         """
-        # Number of examples
-        m = Y.shape[1]
-        
-        # Calculate logistic regression cost function
-        # Cost = -(1/m) * sum(Y*log(A) + (1-Y)*log(1-A))
-        # Use 1.0000001 - A to avoid division by zero errors
-        cost = -(1/m) * np.sum(Y * np.log(A) + (1 - Y) * np.log(1.0000001 - A))
-        
+        loss = -(Y * np.log(A) + (1 - Y) * np.log(1.0000001 - A))
+        cost = np.mean(loss)
         return cost
 
     def evaluate(self, X, Y):
-        """
-        Evaluates the neural network's predictions
+        """ Evaluates the neural network’s predictions
 
         Args:
-            X (numpy.ndarray): Input data with shape (nx, m)
-                nx is the number of input features
-                m is the number of examples
-            Y (numpy.ndarray): Correct labels with shape (1, m)
-
-        Returns:
-            tuple: The neural network's prediction and the cost of the network
+            X (_type_): _description_
+            Y (_type_): _description_
         """
-        # Perform forward propagation to get predictions
-        _, A2 = self.forward_prop(X)
-        
-        # Convert predictions to binary labels (0 or 1)
-        # If output >= 0.5, predict 1; otherwise predict 0
-        predictions = np.where(A2 >= 0.5, 1, 0)
-        
-        # Calculate cost using the cost method
-        cost = self.cost(Y, A2)
-        
-        return predictions, cost
+        self.forward_prop(X)
+        return np.where(self.__A2 >= 0.5, 1, 0), self.cost(Y, self.__A2)
 
     def gradient_descent(self, X, Y, A1, A2, alpha=0.05):
-        """
-        Calculates one pass of gradient descent on the neural network
+        """ Calculates one pass of gradient descent on the neural network
 
         Args:
-            X (numpy.ndarray): Input data with shape (nx, m)
-                nx is the number of input features
-                m is the number of examples
-            Y (numpy.ndarray): Correct labels with shape (1, m)
-            A1 (numpy.ndarray): Output of the hidden layer with shape (nodes, m)
-            A2 (numpy.ndarray): Predicted output with shape (1, m)
-            alpha (float): Learning rate (default: 0.05)
+            X (_type_): _description_
+            Y (_type_): _description_
+            A1 (_type_): _description_
+            A2 (_type_): _description_
+            alpha (float, optional): _description_. Defaults to 0.05.
         """
-        # Number of examples
         m = Y.shape[1]
-        
-        # Gradient for output layer (layer 2)
-        # dZ2 = A2 - Y (derivative of cost with respect to Z2)
-        dZ2 = A2 - Y
-        
-        # Gradient for W2: dW2 = (1/m) * dZ2 * A1.T
-        dW2 = (1/m) * np.matmul(dZ2, A1.T)
-        
-        # Gradient for b2: db2 = (1/m) * sum(dZ2)
-        db2 = (1/m) * np.sum(dZ2, axis=1, keepdims=True)
-        
-        # Gradient for hidden layer (layer 1)
-        # dZ1 = W2.T * dZ2 * A1 * (1 - A1) (chain rule with sigmoid derivative)
-        dZ1 = np.matmul(self.__W2.T, dZ2) * A1 * (1 - A1)
-        
-        # Gradient for W1: dW1 = (1/m) * dZ1 * X.T
-        dW1 = (1/m) * np.matmul(dZ1, X.T)
-        
-        # Gradient for b1: db1 = (1/m) * sum(dZ1)
-        db1 = (1/m) * np.sum(dZ1, axis=1, keepdims=True)
-        
-        # Update weights and biases using gradient descent
-        # W = W - alpha * dW
-        # b = b - alpha * db
-        self.__W1 = self.__W1 - alpha * dW1
-        self.__b1 = self.__b1 - alpha * db1
-        self.__W2 = self.__W2 - alpha * dW2
-        self.__b2 = self.__b2 - alpha * db2
+        dz2 = A2 - Y
+        dw2 = np.matmul(A1, dz2.T) / m
+        db2 = np.sum(dz2, axis=1, keepdims=True) / m
+        dz1 = np.matmul(self.__W2.T, dz2) * A1 * (1 - A1)
+        dw1 = np.matmul(X, dz1.T) / m
+        db1 = np.sum(dz1, axis=1, keepdims=True) / m
+        self.__W2 -= alpha * dw2.T
+        self.__b2 -= alpha * db2
+        self.__W1 -= alpha * dw1.T
+        self.__b1 -= alpha * db1
