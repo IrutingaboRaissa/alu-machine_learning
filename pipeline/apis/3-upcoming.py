@@ -1,31 +1,42 @@
 #!/usr/bin/env python3
-"""Pipeline Api"""
+"""Display the soonest upcoming SpaceX launch using the unofficial API.
+
+Format:
+<launch name> (<date_local>) <rocket name> - <launchpad name> (<locality>)
+"""
+
 import requests
-from datetime import datetime
+
+
+def main():
+    launches_url = "https://api.spacexdata.com/v4/launches/upcoming"
+    resp = requests.get(launches_url)
+    launches = resp.json()
+
+    # Pick the soonest upcoming launch by 'date_unix'.
+    # 'sorted' is stable, so equal dates keep original API order.
+    launches_sorted = sorted(launches, key=lambda x: int(x.get("date_unix", 0)))
+    launch = launches_sorted[0]
+
+    launch_name = launch["name"]
+    date_local = launch["date_local"]
+    rocket_id = launch["rocket"]
+    launchpad_id = launch["launchpad"]
+
+    rocket_name = requests.get(
+        f"https://api.spacexdata.com/v4/rockets/{rocket_id}"
+    ).json()["name"]
+
+    launchpad = requests.get(
+        f"https://api.spacexdata.com/v4/launchpads/{launchpad_id}"
+    ).json()
+    launchpad_name = launchpad["name"]
+    launchpad_locality = launchpad["locality"]
+
+    print(
+        f"{launch_name} ({date_local}) {rocket_name} - {launchpad_name} ({launchpad_locality})"
+    )
 
 
 if __name__ == '__main__':
-    """pipeline api"""
-    url = "https://api.spacexdata.com/v4/launches/upcoming"
-    r = requests.get(url)
-    recent = 0
-
-    for dic in r.json():
-        new = int(dic["date_unix"])
-        if recent == 0 or new < recent:
-            recent = new
-            launch_name = dic["name"]
-            date = dic["date_local"]
-            rocket_number = dic["rocket"]
-            launch_number = dic["launchpad"]
-
-    rurl = "https://api.spacexdata.com/v4/rockets/" + rocket_number
-    rocket_name = requests.get(rurl).json()["name"]
-    lurl = "https://api.spacexdata.com/v4/launchpads/" + launch_number
-    launchpad = requests.get(lurl)
-    launchpad_name = launchpad.json()["name"]
-    launchpad_local = launchpad.json()["locality"]
-    string = "{} ({}) {} - {} ({})".format(launch_name, date, rocket_name,
-                                           launchpad_name, launchpad_local)
-
-    print(string)
+    main()
